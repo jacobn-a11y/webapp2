@@ -19,6 +19,9 @@ import { AdminPublishApprovalsPage } from "./pages/AdminPublishApprovalsPage";
 import { AdminDataQualityPage } from "./pages/AdminDataQualityPage";
 import { AdminSetupWizardPage } from "./pages/AdminSetupWizardPage";
 import { AdminBillingReadinessPage } from "./pages/AdminBillingReadinessPage";
+import { AdminKpiPage } from "./pages/AdminKpiPage";
+import { AdminDrPage } from "./pages/AdminDrPage";
+import { AdminSupportPage } from "./pages/AdminSupportPage";
 import { HomePage } from "./pages/HomePage";
 import {
   clearAuthState,
@@ -77,6 +80,9 @@ function AuthenticatedApp({
         { to: "/admin/data-quality", label: "Data Quality" },
         { to: "/admin/setup", label: "Setup" },
         { to: "/admin/billing", label: "Billing" },
+        { to: "/admin/kpis", label: "KPIs" },
+        { to: "/admin/dr", label: "DR" },
+        { to: "/admin/support", label: "Support" },
         { to: "/workspaces", label: "Workspaces" },
         { to: "/writebacks", label: "Writebacks" },
         { to: "/automations", label: "Automations" },
@@ -164,6 +170,9 @@ function AuthenticatedApp({
           <Route path="/admin/data-quality" element={<AdminDataQualityPage />} />
           <Route path="/admin/setup" element={<AdminSetupWizardPage />} />
           <Route path="/admin/billing" element={<AdminBillingReadinessPage />} />
+          <Route path="/admin/kpis" element={<AdminKpiPage />} />
+          <Route path="/admin/dr" element={<AdminDrPage />} />
+          <Route path="/admin/support" element={<AdminSupportPage />} />
           <Route path="/workspaces" element={<WorkspacesPage />} />
           <Route path="/writebacks" element={<WritebacksPage />} />
           <Route path="/automations" element={<AutomationsPage />} />

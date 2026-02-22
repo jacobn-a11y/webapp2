@@ -13,15 +13,15 @@ StoryEngine is a production-grade, enterprise B2B SaaS platform that converts sa
 
 | Metric | Value |
 |--------|-------|
-| Total Lines of Code | ~54,300 |
-| Backend LOC | ~39,200 |
-| Frontend LOC | ~7,700 |
+| Total Lines of Code | ~58,000 |
+| Backend LOC | ~42,000 |
+| Frontend LOC | ~8,700 |
 | Test LOC | ~7,900 |
-| Source Files | 141 |
-| Database Models (Prisma) | 41 |
+| Source Files | 150+ |
+| Database Models (Prisma) | 66 |
 | API Route Files | 34 |
-| Service Classes | 34 |
-| Middleware Modules | 15 |
+| Service Classes | 38 |
+| Middleware Modules | 17 |
 | Test Files | 35 |
 | External Integrations | 12+ |
 | Environment Variables | 23+ |
@@ -35,7 +35,7 @@ StoryEngine is a production-grade, enterprise B2B SaaS platform that converts sa
 - **Runtime:** Node.js 20 + TypeScript 5.6
 - **Backend:** Express 4.21 with Prisma 5.22 ORM
 - **Frontend:** React 18.3 + Vite 6.0
-- **Database:** PostgreSQL 16 (41 models)
+- **Database:** PostgreSQL 16 (66 models)
 - **Vector DB:** Pinecone 3.0 for semantic search
 - **Job Queue:** BullMQ 5.20 + Redis 7
 - **AI Providers:** OpenAI GPT-4o, Anthropic Claude, Google Gemini (unified routing)
@@ -52,18 +52,18 @@ StoryEngine is a production-grade, enterprise B2B SaaS platform that converts sa
 
 | Layer | Complexity | Notes |
 |-------|-----------|-------|
-| Backend Services | VERY HIGH | 34 service classes: AI orchestration, multi-provider billing, entity resolution, confidence calibration, transcript pipelines |
-| Database Schema | VERY HIGH | 41 Prisma models, multi-tenant relationships, 1,069-line schema |
+| Backend Services | VERY HIGH | 38 service classes: AI orchestration, multi-provider billing, entity resolution, confidence calibration, transcript pipelines, workflow automation, integration reliability, policy engine (70+ actions), data governance |
+| Database Schema | VERY HIGH | 66 Prisma models, multi-tenant relationships, extended schema with lineage tracking |
 | API Routes | HIGH | 34 route modules spanning auth, billing, webhooks, admin, integrations |
 | Async Job Processing | HIGH | 4 BullMQ queues with exponential backoff retries, scheduled cron jobs |
 | Integration Ecosystem | VERY HIGH | 12+ external services with factory/adapter provider registry |
-| Middleware | HIGH | 15 modules: auth, RBAC, billing gate, rate limiting, PII masking, audit logging |
+| Middleware | HIGH | 17 modules: auth, RBAC, billing gate, rate limiting, PII masking, audit logging, cache-control, pagination |
 | AI/ML Pipeline | HIGH | Chunking, tagging (60-topic taxonomy), embeddings, RAG search, story generation |
 | Type System | HIGH | Full end-to-end TypeScript, 48+ API interfaces, taxonomy union types |
 | Testing | MEDIUM | 35 test files covering critical backend paths, minimal frontend tests |
-| Frontend | LOW-MEDIUM | 9 pages, local useState only, no state management library |
+| Frontend | LOW-MEDIUM | 30+ pages (including admin), auth flow with role-aware navigation, local useState |
 | Styling | LOW | Single 67KB CSS file, no framework |
-| CI/CD | LOW | Docker only, no automated pipeline |
+| CI/CD | HIGH | 12-job automated pipeline with lint, typecheck, test, build, security audit, release gates |
 | i18n | NONE | English-only hardcoded strings |
 
 ---

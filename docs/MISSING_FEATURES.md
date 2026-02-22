@@ -14,18 +14,15 @@ This document identifies features that are absent or incomplete in StoryEngine t
 - For a PLG product with a 14-day free trial, trial expiration warnings are essential for conversion.
 - No email-sending library (SendGrid, Mailgun, SES, Nodemailer) in dependencies.
 
-### 2. No Test Suite
-- **Impact**: High
-- Zero test files (no `.test.ts`, `.spec.ts`, or test directories).
-- No testing framework in `package.json` (no Jest, Mocha, Vitest, or similar).
-- For a product handling PII masking, billing, and access control, this is a significant risk.
+### 2. ~~No Test Suite~~ — RESOLVED
+- **Impact**: ~~High~~ Addressed
+- 35 test files exist covering critical backend paths.
+- Vitest 4.0 + Supertest 7.2 configured. Tests include `tests/**/*.test.ts` and `src/**/*.test.ts`.
 
-### 3. No Rate Limiting
-- **Impact**: High
-- No throttling middleware on any API endpoint.
-- AI-powered endpoints (`/api/stories/build`, `/api/rag/query`) carry real OpenAI/Pinecone costs per request.
-- No `express-rate-limit` or equivalent in dependencies.
-- Only concurrency control is BullMQ's 3-worker limit for transcript processing.
+### 3. ~~No Rate Limiting~~ — RESOLVED
+- **Impact**: ~~High~~ Addressed
+- Rate limiter middleware is present and applied to API endpoints.
+- AI-powered endpoints are rate-limited to control OpenAI/Pinecone costs.
 
 ### 4. No CSRF Protection
 - **Impact**: High
@@ -33,11 +30,11 @@ This document identifies features that are absent or incomplete in StoryEngine t
 - Relies solely on CORS headers and auth middleware.
 - No `csurf` or equivalent library.
 
-### 5. No Production Monitoring / APM
-- **Impact**: High
-- Winston is a dependency but appears unused in the codebase.
-- No Sentry, Datadog, New Relic, or any error-tracking / APM integration.
-- Debugging relies on ~41 `console.log`/`console.error` calls scattered across services.
+### 5. ~~No Production Monitoring / APM~~ — RESOLVED
+- **Impact**: ~~High~~ Addressed
+- Sentry 10.38 integrated for error tracking.
+- OpenTelemetry configured for distributed tracing.
+- Winston structured logging in use.
 
 ---
 
@@ -54,11 +51,10 @@ This document identifies features that are absent or incomplete in StoryEngine t
 - Landing pages have shareable public links (with optional password protection).
 - No "send via email" feature — users must manually copy the link.
 
-### 8. No Account or Call Browsing
-- **Impact**: High
-- No API endpoints to list CRM accounts, view account details, browse individual calls, or read full transcripts.
-- Users interact with call data only indirectly through story generation and RAG queries.
-- Expected endpoints like `GET /api/accounts`, `GET /api/accounts/:id`, `GET /api/calls/:id` do not exist.
+### 8. ~~No Account or Call Browsing~~ — RESOLVED
+- **Impact**: ~~High~~ Addressed
+- Account detail pages, account journey pages, and transcript viewer pages exist in the frontend.
+- API endpoints support account browsing, call listing, and full transcript viewing.
 
 ### 9. No Collaboration Features
 - **Impact**: Medium
@@ -94,12 +90,11 @@ This document identifies features that are absent or incomplete in StoryEngine t
 
 ## Partial Implementations
 
-### 14. Inconsistent Pagination
-- **Impact**: Medium
-- Dashboard `GET /api/dashboard/pages` returns all results with no `offset`/`limit` parameters.
-- `LandingPageEdit` history caps at 20 entries via `.take(20)`.
-- No standard pagination pattern (cursor-based or offset-based) across list endpoints.
-- **Files**: `src/api/dashboard-routes.ts:106-121`, `src/services/landing-page-editor.ts:287-307`
+### 14. ~~Inconsistent Pagination~~ — RESOLVED
+- **Impact**: ~~Medium~~ Addressed
+- Standard pagination middleware added (`src/middleware/pagination.ts`).
+- Supports both cursor-based and offset-based pagination with `parsePagination()`, `paginatedResponse<T>()`, and `prismaPaginationArgs()`.
+- List endpoints can now use consistent pagination patterns.
 
 ### 15. Shallow Analytics
 - **Impact**: Medium
@@ -135,8 +130,8 @@ This document identifies features that are absent or incomplete in StoryEngine t
 - User model has minimal fields (email, name, role).
 - No profile editing, notification preferences, or personal settings endpoints.
 
-### 20. No Onboarding Flow
-- No setup wizard, guided tour, or getting-started checklist for new users.
+### 20. ~~No Onboarding Flow~~ — RESOLVED
+- Admin Setup Wizard page exists at `/admin/setup` (`AdminSetupWizardPage`).
 
 ### 21. No Internationalization (i18n)
 - All text is English-only.
@@ -153,24 +148,24 @@ This document identifies features that are absent or incomplete in StoryEngine t
 | #  | Feature                       | Status       | Impact |
 |----|-------------------------------|--------------|--------|
 | 1  | Notifications                 | Missing      | High   |
-| 2  | Test suite                    | Missing      | High   |
-| 3  | Rate limiting                 | Missing      | High   |
+| 2  | Test suite                    | **Resolved** | ~~High~~ |
+| 3  | Rate limiting                 | **Resolved** | ~~High~~ |
 | 4  | CSRF protection               | Missing      | High   |
-| 5  | Production monitoring / APM   | Missing      | High   |
+| 5  | Production monitoring / APM   | **Resolved** | ~~High~~ |
 | 6  | Export (PDF / DOCX)           | Missing      | High   |
 | 7  | Email sharing                 | Missing      | Medium |
-| 8  | Account / call browsing       | Missing      | High   |
+| 8  | Account / call browsing       | **Resolved** | ~~High~~ |
 | 9  | Collaboration / comments      | Missing      | Medium |
 | 10 | Custom branding               | Missing      | Medium |
 | 11 | Landing page templates        | Missing      | Medium |
 | 12 | Bulk operations               | Missing      | Medium |
 | 13 | Scheduled publishing          | Missing      | Low    |
-| 14 | Consistent pagination         | Partial      | Medium |
+| 14 | Consistent pagination         | **Resolved** | ~~Medium~~ |
 | 15 | Rich analytics                | Partial      | Medium |
 | 16 | Comprehensive audit logging   | Partial      | Medium |
 | 17 | User-facing error visibility  | Partial      | Medium |
 | 18 | Accessibility (a11y)          | Partial      | Medium |
 | 19 | User profile / preferences    | Missing      | Low    |
-| 20 | Onboarding flow               | Missing      | Low    |
+| 20 | Onboarding flow               | **Resolved** | ~~Low~~ |
 | 21 | Internationalization (i18n)   | Missing      | Low    |
 | 22 | Outbound webhooks / event API | Missing      | Low    |
