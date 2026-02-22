@@ -63,6 +63,11 @@ import { createOnboardingRoutes } from "./api/onboarding-routes.js";
 import { createArtifactRoutes } from "./api/artifact-routes.js";
 import { createDataQualityRoutes } from "./api/data-quality-routes.js";
 import { createMergePreviewRoutes } from "./api/merge-preview-routes.js";
+import { createKpiRoutes } from "./api/kpi-routes.js";
+import { createRoleDashboardRoutes } from "./api/role-dashboard-routes.js";
+import { createSeatManagementRoutes } from "./api/seat-management-routes.js";
+import { createDrReadinessRoutes } from "./api/dr-readiness-routes.js";
+import { createSupportConsoleRoutes } from "./api/support-console-routes.js";
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 import { requireAuth } from "./middleware/auth.js";
@@ -390,6 +395,31 @@ export function createApp(deps: AppDeps): express.Application {
 
   // ─── Enterprise: Merge Previews & Shared Assets ──────────────────────────
   app.use("/api/merge-preview", trialGate, createMergePreviewRoutes(prisma));
+
+  // ─── Enterprise: KPI Reporting ────────────────────────────────────────────
+  app.use("/api/kpi", trialGate, createKpiRoutes(prisma));
+
+  // ─── Enterprise: Role-Specific Dashboards ─────────────────────────────────
+  app.use("/api/dashboards", trialGate, createRoleDashboardRoutes(prisma));
+
+  // ─── Enterprise: Seat Management & Metering ───────────────────────────────
+  app.use("/api/billing/seats", trialGate, createSeatManagementRoutes(prisma));
+
+  // ─── Enterprise: DR Readiness ─────────────────────────────────────────────
+  app.use(
+    "/api/dr",
+    trialGate,
+    requirePermission(prisma, "manage_permissions"),
+    createDrReadinessRoutes(prisma)
+  );
+
+  // ─── Enterprise: Support Console ──────────────────────────────────────────
+  app.use(
+    "/api/support",
+    trialGate,
+    requirePermission(prisma, "manage_permissions"),
+    createSupportConsoleRoutes(prisma)
+  );
 
   return app;
 }
