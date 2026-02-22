@@ -25,6 +25,8 @@ import {
   STORY_LENGTHS,
   STORY_OUTLINES,
   STORY_TYPES,
+  TARGET_AUDIENCES,
+  CONFIDENTIALITY_LEVELS,
   type StoryContextSettings,
   type StoryPromptDefaults,
 } from "../types/story-generation.js";
@@ -52,10 +54,18 @@ const StoryContextSchema = z.object({
   banned_claims: z.array(z.string().min(1).max(300)).optional(),
   writing_style_guide: z.string().max(4000).optional(),
   approved_terminology: z.array(z.string().min(1).max(80)).optional(),
+  value_proposition: z.string().max(2000).optional(),
+  competitive_advantages: z.array(z.string().min(1).max(400)).optional(),
+  key_metrics: z.array(z.string().min(1).max(200)).optional(),
+  customer_segments: z.array(z.string().min(1).max(200)).optional(),
+  brand_voice: z.string().max(2000).optional(),
+  call_to_action: z.string().max(500).optional(),
   default_story_length: z.enum(STORY_LENGTHS as unknown as [string, ...string[]]).optional(),
   default_story_outline: z.enum(STORY_OUTLINES as unknown as [string, ...string[]]).optional(),
   default_story_format: z.enum(STORY_FORMATS as unknown as [string, ...string[]]).optional(),
   default_story_type: z.enum(STORY_TYPES as unknown as [string, ...string[]]).optional(),
+  default_target_audience: z.enum(TARGET_AUDIENCES as unknown as [string, ...string[]]).optional(),
+  default_confidentiality_level: z.enum(CONFIDENTIALITY_LEVELS as unknown as [string, ...string[]]).optional(),
 });
 
 const DataGovernanceSchema = z.object({
@@ -347,10 +357,18 @@ export function createDashboardRoutes(prisma: PrismaClient): Router {
           banned_claims: context.bannedClaims ?? [],
           writing_style_guide: context.writingStyleGuide ?? "",
           approved_terminology: context.approvedTerminology ?? [],
+          value_proposition: context.valueProposition ?? "",
+          competitive_advantages: context.competitiveAdvantages ?? [],
+          key_metrics: context.keyMetrics ?? [],
+          customer_segments: context.customerSegments ?? [],
+          brand_voice: context.brandVoice ?? "",
+          call_to_action: context.callToAction ?? "",
           default_story_length: defaults.storyLength ?? "MEDIUM",
           default_story_outline: defaults.storyOutline ?? "CHRONOLOGICAL_JOURNEY",
           default_story_format: defaults.storyFormat ?? null,
           default_story_type: defaults.storyType ?? "FULL_ACCOUNT_JOURNEY",
+          default_target_audience: defaults.targetAudience ?? "auto",
+          default_confidentiality_level: defaults.confidentialityLevel ?? "EXTERNAL_PUBLIC",
         });
       } catch (err) {
         logger.error("Get story context error", { error: err });
@@ -371,46 +389,41 @@ export function createDashboardRoutes(prisma: PrismaClient): Router {
 
       const d = parse.data;
       try {
+        const storyContextPayload = {
+          companyOverview: d.company_overview ?? "",
+          products: d.products ?? [],
+          targetPersonas: d.target_personas ?? [],
+          targetIndustries: d.target_industries ?? [],
+          differentiators: d.differentiators ?? [],
+          proofPoints: d.proof_points ?? [],
+          bannedClaims: d.banned_claims ?? [],
+          writingStyleGuide: d.writing_style_guide ?? "",
+          approvedTerminology: d.approved_terminology ?? [],
+          valueProposition: d.value_proposition ?? "",
+          competitiveAdvantages: d.competitive_advantages ?? [],
+          keyMetrics: d.key_metrics ?? [],
+          customerSegments: d.customer_segments ?? [],
+          brandVoice: d.brand_voice ?? "",
+          callToAction: d.call_to_action ?? "",
+        };
+        const storyDefaultsPayload = {
+          storyLength: d.default_story_length ?? "MEDIUM",
+          storyOutline: d.default_story_outline ?? "CHRONOLOGICAL_JOURNEY",
+          storyFormat: d.default_story_format ?? null,
+          storyType: d.default_story_type ?? "FULL_ACCOUNT_JOURNEY",
+          targetAudience: d.default_target_audience ?? "auto",
+          confidentialityLevel: d.default_confidentiality_level ?? "EXTERNAL_PUBLIC",
+        };
         await prisma.orgSettings.upsert({
           where: { organizationId: req.organizationId! },
           create: {
             organizationId: req.organizationId!,
-            storyContext: {
-              companyOverview: d.company_overview ?? "",
-              products: d.products ?? [],
-              targetPersonas: d.target_personas ?? [],
-              targetIndustries: d.target_industries ?? [],
-              differentiators: d.differentiators ?? [],
-              proofPoints: d.proof_points ?? [],
-              bannedClaims: d.banned_claims ?? [],
-              writingStyleGuide: d.writing_style_guide ?? "",
-              approvedTerminology: d.approved_terminology ?? [],
-            },
-            storyPromptDefaults: {
-              storyLength: d.default_story_length ?? "MEDIUM",
-              storyOutline: d.default_story_outline ?? "CHRONOLOGICAL_JOURNEY",
-              storyFormat: d.default_story_format ?? null,
-              storyType: d.default_story_type ?? "FULL_ACCOUNT_JOURNEY",
-            },
+            storyContext: storyContextPayload,
+            storyPromptDefaults: storyDefaultsPayload,
           },
           update: {
-            storyContext: {
-              companyOverview: d.company_overview ?? "",
-              products: d.products ?? [],
-              targetPersonas: d.target_personas ?? [],
-              targetIndustries: d.target_industries ?? [],
-              differentiators: d.differentiators ?? [],
-              proofPoints: d.proof_points ?? [],
-              bannedClaims: d.banned_claims ?? [],
-              writingStyleGuide: d.writing_style_guide ?? "",
-              approvedTerminology: d.approved_terminology ?? [],
-            },
-            storyPromptDefaults: {
-              storyLength: d.default_story_length ?? "MEDIUM",
-              storyOutline: d.default_story_outline ?? "CHRONOLOGICAL_JOURNEY",
-              storyFormat: d.default_story_format ?? null,
-              storyType: d.default_story_type ?? "FULL_ACCOUNT_JOURNEY",
-            },
+            storyContext: storyContextPayload,
+            storyPromptDefaults: storyDefaultsPayload,
           },
         });
         await auditLogs.record({

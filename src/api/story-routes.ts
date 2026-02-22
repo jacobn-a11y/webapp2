@@ -16,9 +16,13 @@ import {
   STORY_LENGTHS,
   STORY_OUTLINES,
   STORY_TYPES,
+  TARGET_AUDIENCES,
+  CONFIDENTIALITY_LEVELS,
   type StoryLength,
   type StoryOutline,
   type StoryTypeInput,
+  type TargetAudience,
+  type ConfidentialityLevel,
 } from "../types/story-generation.js";
 
 // ─── Validation ──────────────────────────────────────────────────────────────
@@ -32,6 +36,8 @@ const BuildStorySchema = z.object({
   story_length: z.enum(STORY_LENGTHS as unknown as [string, ...string[]]).optional(),
   story_outline: z.enum(STORY_OUTLINES as unknown as [string, ...string[]]).optional(),
   story_type: z.enum(STORY_TYPES as unknown as [string, ...string[]]).optional(),
+  target_audience: z.enum(TARGET_AUDIENCES as unknown as [string, ...string[]]).optional(),
+  confidentiality_level: z.enum(CONFIDENTIALITY_LEVELS as unknown as [string, ...string[]]).optional(),
 });
 
 const MergeTranscriptsSchema = z.object({
@@ -89,6 +95,8 @@ export function createStoryRoutes(
       story_length,
       story_outline,
       story_type,
+      target_audience,
+      confidentiality_level,
     } =
       parseResult.data;
 
@@ -129,6 +137,8 @@ export function createStoryRoutes(
         storyLength: story_length as StoryLength | undefined,
         storyOutline: story_outline as StoryOutline | undefined,
         storyType: story_type as StoryTypeInput | undefined,
+        targetAudience: target_audience as TargetAudience | undefined,
+        confidentialityLevel: confidentiality_level as ConfidentialityLevel | undefined,
       });
 
       res.json({

@@ -232,7 +232,13 @@ export type StoryOutline =
   | "BY_THE_NUMBERS"
   | "EXECUTIVE_BRIEF"
   | "IMPLEMENTATION_PLAYBOOK"
-  | "DEAL_ANATOMY";
+  | "DEAL_ANATOMY"
+  | "BEFORE_AFTER"
+  | "DAY_IN_THE_LIFE"
+  | "COMPETITIVE_TEARDOWN"
+  | "STAKEHOLDER_MAP"
+  | "RISK_MITIGATION"
+  | "PARTNERSHIP_EVOLUTION";
 
 export const STORY_OUTLINE_LABELS: Record<StoryOutline, string> = {
   CHRONOLOGICAL_JOURNEY: "Chronological Journey",
@@ -241,6 +247,12 @@ export const STORY_OUTLINE_LABELS: Record<StoryOutline, string> = {
   EXECUTIVE_BRIEF: "Executive Brief",
   IMPLEMENTATION_PLAYBOOK: "Implementation Playbook",
   DEAL_ANATOMY: "Deal Anatomy",
+  BEFORE_AFTER: "Before/After Transformation",
+  DAY_IN_THE_LIFE: "Day-in-the-Life Workflow",
+  COMPETITIVE_TEARDOWN: "Competitive Teardown",
+  STAKEHOLDER_MAP: "Stakeholder Map",
+  RISK_MITIGATION: "Risk Mitigation",
+  PARTNERSHIP_EVOLUTION: "Partnership Evolution",
 };
 
 export type StoryTypeInput = "FULL_ACCOUNT_JOURNEY" | TaxonomyTopic;
@@ -248,4 +260,42 @@ export type StoryTypeInput = "FULL_ACCOUNT_JOURNEY" | TaxonomyTopic;
 export const STORY_TYPE_INPUT_LABELS: Record<StoryTypeInput, string> = {
   FULL_ACCOUNT_JOURNEY: "Full Account Journey",
   ...TOPIC_LABELS,
+};
+
+export type TargetAudience =
+  | "auto"
+  | "CTO_TECHNICAL_LEADER"
+  | "CFO_FINANCE_LEADER"
+  | "CEO_EXECUTIVE"
+  | "VP_SALES_REVOPS"
+  | "VP_MARKETING"
+  | "END_USER_PRACTITIONER"
+  | "PROCUREMENT_LEGAL"
+  | "IT_SECURITY"
+  | "BOARD_INVESTOR";
+
+export const TARGET_AUDIENCE_LABELS: Record<TargetAudience, string> = {
+  auto: "Auto-detect from content",
+  CTO_TECHNICAL_LEADER: "CTO / Technical Leader",
+  CFO_FINANCE_LEADER: "CFO / Finance Leader",
+  CEO_EXECUTIVE: "CEO / Executive",
+  VP_SALES_REVOPS: "VP Sales / RevOps",
+  VP_MARKETING: "VP Marketing",
+  END_USER_PRACTITIONER: "End User / Practitioner",
+  PROCUREMENT_LEGAL: "Procurement / Legal",
+  IT_SECURITY: "IT / Security",
+  BOARD_INVESTOR: "Board / Investor",
+};
+
+export type ConfidentialityLevel =
+  | "EXTERNAL_PUBLIC"
+  | "EXTERNAL_GATED"
+  | "INTERNAL_ONLY"
+  | "SALES_ENABLEMENT";
+
+export const CONFIDENTIALITY_LEVEL_LABELS: Record<ConfidentialityLevel, string> = {
+  EXTERNAL_PUBLIC: "External — Public",
+  EXTERNAL_GATED: "External — Gated",
+  INTERNAL_ONLY: "Internal Only",
+  SALES_ENABLEMENT: "Sales Enablement",
 };

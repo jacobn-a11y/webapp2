@@ -10,12 +10,16 @@ import {
   type StoryLength,
   type StoryOutline,
   type StoryTypeInput,
+  type TargetAudience,
+  type ConfidentialityLevel,
   FUNNEL_STAGE_LABELS,
   STAGE_TOPICS,
   TOPIC_LABELS,
   STORY_LENGTH_LABELS,
   STORY_OUTLINE_LABELS,
   STORY_TYPE_INPUT_LABELS,
+  TARGET_AUDIENCE_LABELS,
+  CONFIDENTIALITY_LEVEL_LABELS,
 } from "../types/taxonomy";
 import {
   buildStory,
@@ -65,6 +69,12 @@ const STORY_LENGTH_OPTIONS = Object.entries(
 const STORY_OUTLINE_OPTIONS = Object.entries(
   STORY_OUTLINE_LABELS
 ) as [StoryOutline, string][];
+const TARGET_AUDIENCE_OPTIONS = Object.entries(
+  TARGET_AUDIENCE_LABELS
+) as [TargetAudience, string][];
+const CONFIDENTIALITY_OPTIONS = Object.entries(
+  CONFIDENTIALITY_LEVEL_LABELS
+) as [ConfidentialityLevel, string][];
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -82,6 +92,8 @@ export function StoryGeneratorModal({
   const [storyLength, setStoryLength] = useState<StoryLength>("MEDIUM");
   const [storyOutline, setStoryOutline] = useState<StoryOutline>("CHRONOLOGICAL_JOURNEY");
   const [storyType, setStoryType] = useState<StoryTypeInput>("FULL_ACCOUNT_JOURNEY");
+  const [targetAudience, setTargetAudience] = useState<TargetAudience>("auto");
+  const [confidentialityLevel, setConfidentialityLevel] = useState<ConfidentialityLevel>("EXTERNAL_PUBLIC");
 
   // Flow state
   const [phase, setPhase] = useState<ModalPhase>("form");
@@ -101,6 +113,8 @@ export function StoryGeneratorModal({
         );
         setStoryType(settings.default_story_type ?? "FULL_ACCOUNT_JOURNEY");
         setSelectedFormat(settings.default_story_format ?? "");
+        setTargetAudience(settings.default_target_audience ?? "auto");
+        setConfidentialityLevel(settings.default_confidentiality_level ?? "EXTERNAL_PUBLIC");
       })
       .catch(() => {
         // Use local defaults if org settings are unavailable.
@@ -134,6 +148,8 @@ export function StoryGeneratorModal({
         story_length: storyLength,
         story_outline: storyOutline,
         story_type: storyType,
+        target_audience: targetAudience,
+        confidentiality_level: confidentialityLevel,
       });
       setResult(res);
       setPhase("preview");
@@ -150,6 +166,8 @@ export function StoryGeneratorModal({
     storyLength,
     storyOutline,
     storyType,
+    targetAudience,
+    confidentialityLevel,
   ]);
 
   const handleCopyMarkdown = useCallback(async () => {
@@ -315,6 +333,42 @@ export function StoryGeneratorModal({
                   onChange={(e) => setStoryType(e.target.value as StoryTypeInput)}
                 >
                   {STORY_TYPE_OPTIONS.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label className="form-field__label">
+                  Target Audience
+                  <span className="form-field__hint">Who will read this story?</span>
+                </label>
+                <select
+                  className="form-field__input"
+                  value={targetAudience}
+                  onChange={(e) => setTargetAudience(e.target.value as TargetAudience)}
+                >
+                  {TARGET_AUDIENCE_OPTIONS.map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label className="form-field__label">
+                  Confidentiality
+                  <span className="form-field__hint">Controls disclosure depth</span>
+                </label>
+                <select
+                  className="form-field__input"
+                  value={confidentialityLevel}
+                  onChange={(e) => setConfidentialityLevel(e.target.value as ConfidentialityLevel)}
+                >
+                  {CONFIDENTIALITY_OPTIONS.map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
                     </option>

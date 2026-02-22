@@ -2,7 +2,7 @@
  * API client for StoryEngine backend.
  */
 
-import type { FunnelStage, TaxonomyTopic, StoryFormat } from "../types/taxonomy";
+import type { FunnelStage, TaxonomyTopic, StoryFormat, TargetAudience, ConfidentialityLevel } from "../types/taxonomy";
 import type { StoryLength, StoryOutline, StoryTypeInput } from "../types/taxonomy";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -16,6 +16,8 @@ export interface BuildStoryRequest {
   story_length?: StoryLength;
   story_outline?: StoryOutline;
   story_type?: StoryTypeInput;
+  target_audience?: TargetAudience;
+  confidentiality_level?: ConfidentialityLevel;
 }
 
 export interface StoryQuote {
@@ -182,10 +184,18 @@ export interface StoryContextSettings {
   banned_claims: string[];
   writing_style_guide: string;
   approved_terminology: string[];
+  value_proposition: string;
+  competitive_advantages: string[];
+  key_metrics: string[];
+  customer_segments: string[];
+  brand_voice: string;
+  call_to_action: string;
   default_story_length: StoryLength;
   default_story_outline: StoryOutline;
   default_story_format: StoryFormat | null;
   default_story_type: StoryTypeInput;
+  default_target_audience: TargetAudience;
+  default_confidentiality_level: ConfidentialityLevel;
 }
 
 export interface AuditLogEntry {
