@@ -11,6 +11,11 @@ import { AccountJourneyPage } from "./pages/AccountJourneyPage";
 import { AdminRolesPage } from "./pages/AdminRolesPage";
 import { AdminStoryContextPage } from "./pages/AdminStoryContextPage";
 import { AdminAuditLogsPage } from "./pages/AdminAuditLogsPage";
+import { AdminSessionsPage } from "./pages/AdminSessionsPage";
+import { AdminIntegrationHealthPage } from "./pages/AdminIntegrationHealthPage";
+import { AdminGovernancePage } from "./pages/AdminGovernancePage";
+import { AdminAutomationPage } from "./pages/AdminAutomationPage";
+import { AdminOnboardingPage } from "./pages/AdminOnboardingPage";
 
 export default function App() {
   return (
@@ -43,6 +48,21 @@ export default function App() {
           </Link>
           <Link to="/admin/audit-logs" className="app-nav__link">
             Audit Logs
+          </Link>
+          <Link to="/admin/sessions" className="app-nav__link">
+            Sessions
+          </Link>
+          <Link to="/admin/integration-health" className="app-nav__link">
+            Integrations
+          </Link>
+          <Link to="/admin/governance" className="app-nav__link">
+            Governance
+          </Link>
+          <Link to="/admin/automation" className="app-nav__link">
+            Automation
+          </Link>
+          <Link to="/admin/onboarding" className="app-nav__link">
+            Onboarding
           </Link>
         </nav>
         <main className="app-content">
@@ -98,6 +118,26 @@ export default function App() {
             <Route
               path="/analytics"
               element={<AnalyticsDashboardPage />}
+            />
+            <Route
+              path="/admin/sessions"
+              element={<AdminSessionsPage />}
+            />
+            <Route
+              path="/admin/integration-health"
+              element={<AdminIntegrationHealthPage />}
+            />
+            <Route
+              path="/admin/governance"
+              element={<AdminGovernancePage />}
+            />
+            <Route
+              path="/admin/automation"
+              element={<AdminAutomationPage />}
+            />
+            <Route
+              path="/admin/onboarding"
+              element={<AdminOnboardingPage />}
             />
           </Routes>
         </main>

@@ -10,19 +10,19 @@ datasource db {
 // ─── Auth & Tenancy ──────────────────────────────────────────────────────────
 
 model Organization {
-  id               String          @id @default(cuid())
+  id               String         @id @default(cuid())
   name             String
-  workosOrgId      String?         @unique
-  stripeCustomerId String?         @unique
-  plan             Plan            @default(FREE_TRIAL)
-  pricingModel     PricingModel    @default(METERED)
-  billingChannel   BillingChannel  @default(SELF_SERVE)
-  billingEnabled   Boolean         @default(false)
+  workosOrgId      String?        @unique
+  stripeCustomerId String?        @unique
+  plan             Plan           @default(FREE_TRIAL)
+  pricingModel     PricingModel   @default(METERED)
+  billingChannel   BillingChannel @default(SELF_SERVE)
+  billingEnabled   Boolean        @default(false)
   seatLimit        Int?
   trialEndsAt      DateTime?
   contractEndsAt   DateTime?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   users                User[]
   accounts             Account[]
@@ -48,6 +48,30 @@ model Organization {
   roleProfiles         RoleProfile[]
   auditLogs            AuditLog[]
   featureFlags         OrgFeatureFlag[]
+  sessionPolicy        SessionPolicy?
+  ipAllowlist          IpAllowlistEntry[]
+  userSessions         UserSession[]
+  scimIdentities       ScimIdentity[]
+  approvalWorkflows    ApprovalWorkflow[]
+  approvalRequests     ApprovalRequest[]
+  integrationRuns      IntegrationRun[]
+  integrationDlq       IntegrationDlqEntry[]
+  retentionJobs        RetentionJob[]
+  legalHolds           LegalHold[]
+  deletionRequests     DeletionRequest[]
+  crmWritebacks        CrmWritebackAction[]
+  automationRules      AutomationRule[]
+  automationExecs      AutomationExecution[]
+  deliveryTargets      DeliveryTarget[]
+  artifactVersions     ArtifactVersion[]
+  publishApprovals     PublishApproval[]
+  dataLineage          DataLineage[]
+  qualityMetrics       QualityMetric[]
+  orgHealthScores      OrgHealthScore[]
+  onboardingProgress   OnboardingProgress[]
+  mergePreview         MergePreview[]
+  savedViews           SavedView[]
+  sharedAssets         SharedAsset[]
 
   @@map("organizations")
 }
@@ -128,6 +152,8 @@ model User {
   aiAccess             UserAIAccess[]
   aiBalance            UserAIBalance[]
   roleAssignment       UserRoleAssignment?
+  sessions             UserSession[]
+  scimIdentity         ScimIdentity?
 
   @@index([organizationId])
   @@map("users")
@@ -187,21 +213,21 @@ model UserRoleAssignment {
 // ─── CRM Entities ────────────────────────────────────────────────────────────
 
 model Account {
-  id              String   @id @default(cuid())
-  organizationId  String
-  name            String
-  normalizedName  String
-  domain          String?
-  salesforceId    String?
-  hubspotId       String?
-  mergeAccountId  String?
-  industry        String?
-  employeeCount   Int?
-  annualRevenue   Float?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  normalizedName String
+  domain         String?
+  salesforceId   String?
+  hubspotId      String?
+  mergeAccountId String?
+  industry       String?
+  employeeCount  Int?
+  annualRevenue  Float?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  organization     Organization      @relation(fields: [organizationId], references: [id])
+  organization     Organization        @relation(fields: [organizationId], references: [id])
   contacts         Contact[]
   calls            Call[]
   salesforceEvents SalesforceEvent[]
@@ -321,12 +347,12 @@ model CallParticipant {
 }
 
 model Transcript {
-  id         String   @id @default(cuid())
-  callId     String   @unique
-  fullText   String
-  language   String   @default("en")
-  wordCount  Int
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  callId    String   @unique
+  fullText  String
+  language  String   @default("en")
+  wordCount Int
+  createdAt DateTime @default(now())
 
   call   Call              @relation(fields: [callId], references: [id], onDelete: Cascade)
   chunks TranscriptChunk[]
@@ -440,8 +466,8 @@ model Story {
   generatedAt    DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  organization Organization   @relation(fields: [organizationId], references: [id])
-  account      Account        @relation(fields: [accountId], references: [id])
+  organization Organization     @relation(fields: [organizationId], references: [id])
+  account      Account          @relation(fields: [accountId], references: [id])
   quotes       HighValueQuote[]
   landingPages LandingPage[]
 
@@ -528,36 +554,36 @@ model HighValueQuote {
 // ─── Landing Pages (Publishable Story Pages) ────────────────────────────────
 
 model LandingPage {
-  id                 String         @id @default(cuid())
-  organizationId     String
-  storyId            String
-  createdById        String
-  slug               String         @unique
-  title              String
-  subtitle           String?
-  editableBody       String
-  scrubbedBody       String
-  scrubbedTitle      String?
-  scrubbedSubtitle   String?
-  heroImageUrl       String?
-  calloutBoxes       Json?
+  id                   String         @id @default(cuid())
+  organizationId       String
+  storyId              String
+  createdById          String
+  slug                 String         @unique
+  title                String
+  subtitle             String?
+  editableBody         String
+  scrubbedBody         String
+  scrubbedTitle        String?
+  scrubbedSubtitle     String?
+  heroImageUrl         String?
+  calloutBoxes         Json?
   scrubbedCalloutBoxes Json?
-  totalCallHours     Float          @default(0)
-  visibility         PageVisibility @default(PRIVATE)
-  status             PageStatus     @default(DRAFT)
-  password           String?
-  includeCompanyName Boolean        @default(false)
-  noIndex            Boolean        @default(true)
-  customCss          String?
-  viewCount          Int            @default(0)
-  publishedAt        DateTime?
-  expiresAt          DateTime?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
+  totalCallHours       Float          @default(0)
+  visibility           PageVisibility @default(PRIVATE)
+  status               PageStatus     @default(DRAFT)
+  password             String?
+  includeCompanyName   Boolean        @default(false)
+  noIndex              Boolean        @default(true)
+  customCss            String?
+  viewCount            Int            @default(0)
+  publishedAt          DateTime?
+  expiresAt            DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 
   organization Organization      @relation(fields: [organizationId], references: [id])
-  story        Story              @relation(fields: [storyId], references: [id])
-  createdBy    User               @relation("CreatedBy", fields: [createdById], references: [id])
+  story        Story             @relation(fields: [storyId], references: [id])
+  createdBy    User              @relation("CreatedBy", fields: [createdById], references: [id])
   edits        LandingPageEdit[]
 
   @@index([organizationId, status])
@@ -595,22 +621,22 @@ model LandingPageEdit {
 // ─── Permissions & Org Settings ──────────────────────────────────────────────
 
 model OrgSettings {
-  id                        String                   @id @default(cuid())
-  organizationId            String                   @unique
-  landingPagesEnabled       Boolean                  @default(true)
-  defaultPageVisibility     PageVisibility           @default(PRIVATE)
-  requireApprovalToPublish  Boolean                  @default(false)
-  allowedPublishers         UserRole[]               @default([OWNER, ADMIN])
-  maxPagesPerUser           Int?
-  companyNameReplacements   Json?
-  anonymizationEnabled      Boolean                  @default(true)
-  transcriptMergeMaxWords   Int                      @default(600000)
-  transcriptTruncationMode  TranscriptTruncationMode @default(OLDEST_FIRST)
-  dataGovernancePolicy      Json?
-  storyContext              Json?
-  storyPromptDefaults       Json?
-  createdAt                 DateTime                 @default(now())
-  updatedAt                 DateTime                 @updatedAt
+  id                       String                   @id @default(cuid())
+  organizationId           String                   @unique
+  landingPagesEnabled      Boolean                  @default(true)
+  defaultPageVisibility    PageVisibility           @default(PRIVATE)
+  requireApprovalToPublish Boolean                  @default(false)
+  allowedPublishers        UserRole[]               @default([OWNER, ADMIN])
+  maxPagesPerUser          Int?
+  companyNameReplacements  Json?
+  anonymizationEnabled     Boolean                  @default(true)
+  transcriptMergeMaxWords  Int                      @default(600000)
+  transcriptTruncationMode TranscriptTruncationMode @default(OLDEST_FIRST)
+  dataGovernancePolicy     Json?
+  storyContext             Json?
+  storyPromptDefaults      Json?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -725,16 +751,16 @@ enum BillingInterval {
 }
 
 model UsageRecord {
-  id                String      @id @default(cuid())
-  organizationId    String
-  metric            UsageMetric
-  quantity          Float
-  periodStart       DateTime
-  periodEnd         DateTime
-  reportedToStripe  Boolean     @default(false)
-  stripeRecordId    String?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  id               String      @id @default(cuid())
+  organizationId   String
+  metric           UsageMetric
+  quantity         Float
+  periodStart      DateTime
+  periodEnd        DateTime
+  reportedToStripe Boolean     @default(false)
+  stripeRecordId   String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -754,23 +780,23 @@ enum UsageMetric {
 // ─── API Keys (External RAG Consumers) ──────────────────────────────────────
 
 model ApiKey {
-  id               String    @id @default(cuid())
-  organizationId   String
-  keyHash          String    @unique
-  keyPrefix        String
-  label            String
-  scopes           String[]  @default(["rag:query"])
-  expiresAt        DateTime?
-  revokedAt        DateTime?
-  lastUsedAt       DateTime?
-  replacedByKeyId  String?   @unique
+  id                String    @id @default(cuid())
+  organizationId    String
+  keyHash           String    @unique
+  keyPrefix         String
+  label             String
+  scopes            String[]  @default(["rag:query"])
+  expiresAt         DateTime?
+  revokedAt         DateTime?
+  lastUsedAt        DateTime?
+  replacedByKeyId   String?   @unique
   gracePeriodEndsAt DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  organization  Organization @relation(fields: [organizationId], references: [id])
-  replacedByKey ApiKey?      @relation("KeyRotation", fields: [replacedByKeyId], references: [id])
-  replacesKey   ApiKey?      @relation("KeyRotation")
+  organization  Organization  @relation(fields: [organizationId], references: [id])
+  replacedByKey ApiKey?       @relation("KeyRotation", fields: [replacedByKeyId], references: [id])
+  replacesKey   ApiKey?       @relation("KeyRotation")
   usageLogs     ApiUsageLog[]
 
   @@index([organizationId])
@@ -1042,17 +1068,17 @@ model OrgAISettings {
 }
 
 model OrgAIRoleDefault {
-  id                String           @id @default(cuid())
-  organizationId    String
-  role              UserRole
-  allowedProviders  AIProviderType[]
-  allowedModels     String[]
-  maxTokensPerDay   Int?
-  maxTokensPerMonth Int?
+  id                 String           @id @default(cuid())
+  organizationId     String
+  role               UserRole
+  allowedProviders   AIProviderType[]
+  allowedModels      String[]
+  maxTokensPerDay    Int?
+  maxTokensPerMonth  Int?
   maxStoriesPerMonth Int?
-  maxRequestsPerDay Int?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  maxRequestsPerDay  Int?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id])
 
@@ -1203,4 +1229,671 @@ model AIUsageNotification {
 
   @@index([userId, acknowledged, createdAt])
   @@map("ai_usage_notifications")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: SESSION POLICIES, IP ALLOWLIST, USER SESSIONS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum SessionPolicyAction {
+  ALLOW
+  DENY
+  MFA_REQUIRED
+}
+
+model SessionPolicy {
+  id                   String              @id @default(cuid())
+  organizationId       String              @unique
+  maxSessionDurationMs Int?
+  idleTimeoutMs        Int?
+  mfaRequired          Boolean             @default(false)
+  mfaGracePeriodMs     Int?
+  ipAllowlistEnabled   Boolean             @default(false)
+  defaultAction        SessionPolicyAction @default(ALLOW)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("session_policies")
+}
+
+model IpAllowlistEntry {
+  id             String   @id @default(cuid())
+  organizationId String
+  cidr           String
+  label          String?
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, cidr])
+  @@map("ip_allowlist_entries")
+}
+
+model UserSession {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  tokenHash      String    @unique
+  ipAddress      String?
+  userAgent      String?
+  deviceType     String?
+  country        String?
+  mfaVerifiedAt  DateTime?
+  lastActiveAt   DateTime  @default(now())
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([organizationId, lastActiveAt])
+  @@map("user_sessions")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: SCIM IDENTITY PROVISIONING
+// ═════════════════════════════════════════════════════════════════════════════
+
+model ScimIdentity {
+  id              String   @id @default(cuid())
+  organizationId  String
+  userId          String   @unique
+  scimExternalId  String
+  scimUserName    String
+  scimDisplayName String?
+  scimEmails      Json?
+  scimGroups      Json?
+  active          Boolean  @default(true)
+  lastSyncedAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, scimExternalId])
+  @@index([organizationId, active])
+  @@map("scim_identities")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: APPROVAL WORKFLOWS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum ApprovalState {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELED
+  EXPIRED
+}
+
+enum ApprovalTargetType {
+  LANDING_PAGE
+  STORY
+  DELETION_REQUEST
+  ARTIFACT_VERSION
+}
+
+model ApprovalWorkflow {
+  id             String             @id @default(cuid())
+  organizationId String
+  name           String
+  targetType     ApprovalTargetType
+  stepsJson      Json
+  enabled        Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  requests     ApprovalRequest[]
+
+  @@unique([organizationId, name])
+  @@map("approval_workflows")
+}
+
+model ApprovalRequest {
+  id             String             @id @default(cuid())
+  organizationId String
+  workflowId     String
+  targetType     ApprovalTargetType
+  targetId       String
+  requesterId    String
+  state          ApprovalState      @default(PENDING)
+  currentStep    Int                @default(0)
+  reviewerId     String?
+  reviewNote     String?
+  reviewedAt     DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workflow     ApprovalWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, state])
+  @@index([targetType, targetId])
+  @@map("approval_requests")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: INTEGRATION RUN LEDGER & DEAD LETTER QUEUE
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum IntegrationRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  PARTIAL
+}
+
+enum DlqEntryStatus {
+  PENDING
+  RETRIED
+  RESOLVED
+  DISCARDED
+}
+
+model IntegrationRun {
+  id             String               @id @default(cuid())
+  organizationId String
+  provider       IntegrationProvider
+  idempotencyKey String               @unique
+  status         IntegrationRunStatus @default(RUNNING)
+  itemsProcessed Int                  @default(0)
+  itemsFailed    Int                  @default(0)
+  errorMessage   String?
+  metadata       Json?
+  startedAt      DateTime             @default(now())
+  completedAt    DateTime?
+  createdAt      DateTime             @default(now())
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dlqEntries   IntegrationDlqEntry[]
+
+  @@index([organizationId, provider, startedAt])
+  @@map("integration_runs")
+}
+
+model IntegrationDlqEntry {
+  id               String         @id @default(cuid())
+  organizationId   String
+  integrationRunId String
+  externalId       String?
+  payload          Json
+  errorMessage     String
+  errorCode        String?
+  retryCount       Int            @default(0)
+  status           DlqEntryStatus @default(PENDING)
+  resolvedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  integrationRun IntegrationRun @relation(fields: [integrationRunId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([integrationRunId])
+  @@map("integration_dlq_entries")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: DATA RETENTION, LEGAL HOLD & DELETION REQUESTS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum RetentionJobStatus {
+  SCHEDULED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+enum DeletionRequestStatus {
+  PENDING_APPROVAL
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELED
+}
+
+enum LegalHoldScope {
+  ORGANIZATION
+  ACCOUNT
+  USER
+  CALL
+  STORY
+}
+
+model RetentionJob {
+  id             String             @id @default(cuid())
+  organizationId String
+  policyName     String
+  targetType     String
+  retentionDays  Int
+  dryRun         Boolean            @default(false)
+  status         RetentionJobStatus @default(SCHEDULED)
+  itemsEvaluated Int                @default(0)
+  itemsDeleted   Int                @default(0)
+  errorMessage   String?
+  scheduledAt    DateTime
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([scheduledAt, status])
+  @@map("retention_jobs")
+}
+
+model LegalHold {
+  id             String         @id @default(cuid())
+  organizationId String
+  scope          LegalHoldScope
+  targetId       String?
+  reason         String
+  externalRef    String?
+  holdStartedAt  DateTime       @default(now())
+  holdEndedAt    DateTime?
+  createdById    String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, scope])
+  @@index([scope, targetId])
+  @@map("legal_holds")
+}
+
+model DeletionRequest {
+  id               String                @id @default(cuid())
+  organizationId   String
+  requesterId      String
+  targetType       String
+  targetId         String
+  reason           String?
+  status           DeletionRequestStatus @default(PENDING_APPROVAL)
+  approvalId       String?
+  deletedItemsJson Json?
+  completedAt      DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([targetType, targetId])
+  @@map("deletion_requests")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: CRM WRITEBACK
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum CrmWritebackStatus {
+  QUEUED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum CrmWritebackType {
+  CREATE_NOTE
+  UPDATE_FIELD
+  CREATE_TASK
+  LOG_ACTIVITY
+}
+
+model CrmWritebackAction {
+  id             String             @id @default(cuid())
+  organizationId String
+  provider       CRMProvider
+  writebackType  CrmWritebackType
+  targetObject   String
+  targetId       String
+  payload        Json
+  status         CrmWritebackStatus @default(QUEUED)
+  retryCount     Int                @default(0)
+  errorMessage   String?
+  externalRef    String?
+  idempotencyKey String?            @unique
+  scheduledAt    DateTime           @default(now())
+  executedAt     DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([scheduledAt, status])
+  @@map("crm_writeback_actions")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: AUTOMATION RULES & EXECUTION LOG
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum AutomationTriggerType {
+  CALL_PROCESSED
+  STORY_GENERATED
+  PAGE_PUBLISHED
+  APPROVAL_STATE_CHANGE
+  ACCOUNT_CREATED
+  INTEGRATION_SYNC_COMPLETE
+  SCHEDULE
+}
+
+enum AutomationActionType {
+  SEND_NOTIFICATION
+  CRM_WRITEBACK
+  WEBHOOK
+  GENERATE_STORY
+  PUBLISH_PAGE
+  ASSIGN_TAG
+}
+
+enum AutomationExecutionStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+model AutomationRule {
+  id              String                @id @default(cuid())
+  organizationId  String
+  name            String
+  description     String?
+  triggerType     AutomationTriggerType
+  triggerConfig   Json
+  actionType      AutomationActionType
+  actionConfig    Json
+  enabled         Boolean               @default(true)
+  priority        Int                   @default(0)
+  lastTriggeredAt DateTime?
+  createdById     String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  executions   AutomationExecution[]
+
+  @@index([organizationId, enabled])
+  @@index([triggerType, enabled])
+  @@map("automation_rules")
+}
+
+model AutomationExecution {
+  id             String                    @id @default(cuid())
+  organizationId String
+  ruleId         String
+  triggerPayload Json?
+  actionPayload  Json?
+  status         AutomationExecutionStatus @default(RUNNING)
+  errorMessage   String?
+  durationMs     Int?
+  createdAt      DateTime                  @default(now())
+  completedAt    DateTime?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rule         AutomationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([ruleId, createdAt])
+  @@map("automation_executions")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: DELIVERY TARGETS (NOTIFICATIONS)
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum DeliveryTargetType {
+  EMAIL
+  SLACK
+  WEBHOOK
+  MS_TEAMS
+  PAGERDUTY
+}
+
+model DeliveryTarget {
+  id             String             @id @default(cuid())
+  organizationId String
+  name           String
+  targetType     DeliveryTargetType
+  config         Json
+  enabled        Boolean            @default(true)
+  lastUsedAt     DateTime?
+  lastError      String?
+  createdById    String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, targetType])
+  @@map("delivery_targets")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: ARTIFACT VERSIONING & PUBLISH APPROVALS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum ArtifactType {
+  LANDING_PAGE
+  STORY
+  REPORT
+  TEMPLATE
+}
+
+enum PublishApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
+}
+
+model ArtifactVersion {
+  id              String       @id @default(cuid())
+  organizationId  String
+  artifactType    ArtifactType
+  artifactId      String
+  version         Int
+  contentSnapshot Json
+  changeNote      String?
+  createdById     String?
+  createdAt       DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([artifactType, artifactId, version])
+  @@index([organizationId, artifactType])
+  @@map("artifact_versions")
+}
+
+model PublishApproval {
+  id             String                @id @default(cuid())
+  organizationId String
+  artifactType   ArtifactType
+  artifactId     String
+  version        Int?
+  requesterId    String
+  reviewerId     String?
+  status         PublishApprovalStatus @default(PENDING)
+  reviewNote     String?
+  reviewedAt     DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([artifactType, artifactId])
+  @@map("publish_approvals")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: DATA LINEAGE & QUALITY
+// ═════════════════════════════════════════════════════════════════════════════
+
+model DataLineage {
+  id             String   @id @default(cuid())
+  organizationId String
+  targetType     String
+  targetId       String
+  sourceType     String
+  sourceId       String
+  relationship   String
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, targetId])
+  @@index([sourceType, sourceId])
+  @@index([organizationId])
+  @@map("data_lineage")
+}
+
+model QualityMetric {
+  id             String   @id @default(cuid())
+  organizationId String
+  metricName     String
+  dimension      String
+  dimensionId    String?
+  score          Float
+  details        Json?
+  measuredAt     DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, metricName, measuredAt])
+  @@index([dimension, dimensionId])
+  @@map("quality_metrics")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: ORG HEALTH SCORE & ONBOARDING
+// ═════════════════════════════════════════════════════════════════════════════
+
+model OrgHealthScore {
+  id             String   @id @default(cuid())
+  organizationId String
+  overallScore   Float
+  dimensions     Json
+  trend          String?
+  calculatedAt   DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, calculatedAt])
+  @@map("org_health_scores")
+}
+
+model OnboardingProgress {
+  id             String    @id @default(cuid())
+  organizationId String
+  stepKey        String
+  stepName       String
+  completed      Boolean   @default(false)
+  completedAt    DateTime?
+  completedById  String?
+  metadata       Json?
+  sortOrder      Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, stepKey])
+  @@map("onboarding_progress")
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE: MERGE PREVIEW, SAVED VIEWS & SHARED ASSETS
+// ═════════════════════════════════════════════════════════════════════════════
+
+enum MergePreviewStatus {
+  PENDING
+  COMPUTING
+  READY
+  APPLIED
+  DISCARDED
+}
+
+model MergePreview {
+  id             String             @id @default(cuid())
+  organizationId String
+  sourceType     String
+  sourceId       String
+  targetType     String
+  targetId       String
+  impactDiff     Json
+  status         MergePreviewStatus @default(PENDING)
+  createdById    String?
+  appliedAt      DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status])
+  @@index([sourceType, sourceId])
+  @@map("merge_previews")
+}
+
+model SavedView {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  viewType       String
+  filtersJson    Json
+  columnsJson    Json?
+  sortJson       Json?
+  isDefault      Boolean  @default(false)
+  isShared       Boolean  @default(false)
+  createdById    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, viewType])
+  @@map("saved_views")
+}
+
+model SharedAsset {
+  id             String   @id @default(cuid())
+  organizationId String
+  assetType      String
+  name           String
+  description    String?
+  storageUrl     String
+  mimeType       String?
+  fileSizeBytes  Int?
+  thumbnailUrl   String?
+  tags           String[] @default([])
+  uploadedById   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, assetType])
+  @@map("shared_assets")
 }

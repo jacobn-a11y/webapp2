@@ -680,3 +680,449 @@ export async function getAccountJourney(accountId: string): Promise<{
     stage_counts: Record<string, number>;
   }>(`/accounts/${accountId}/journey`);
 }
+
+// ─── Session Management ──────────────────────────────────────────────────────
+
+export interface SessionPolicy {
+  id: string;
+  maxSessionDurationMs: number | null;
+  idleTimeoutMs: number | null;
+  mfaRequired: boolean;
+  mfaGracePeriodMs: number | null;
+  ipAllowlistEnabled: boolean;
+  defaultAction: string;
+}
+
+export interface UserSessionEntry {
+  id: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  deviceType: string | null;
+  lastActiveAt: string;
+  createdAt: string;
+}
+
+export interface IpAllowlistEntry {
+  id: string;
+  cidr: string;
+  label: string | null;
+  createdAt: string;
+}
+
+export async function getSessionPolicy(): Promise<{ policy: SessionPolicy | null }> {
+  return request<{ policy: SessionPolicy | null }>("/sessions/policy");
+}
+
+export async function updateSessionPolicy(policy: Partial<SessionPolicy>): Promise<{ policy: SessionPolicy }> {
+  return request<{ policy: SessionPolicy }>("/sessions/policy", {
+    method: "PUT",
+    body: JSON.stringify(policy),
+  });
+}
+
+export async function getActiveSessions(): Promise<{ sessions: UserSessionEntry[] }> {
+  return request<{ sessions: UserSessionEntry[] }>("/sessions/sessions");
+}
+
+export async function revokeSession(sessionId: string): Promise<void> {
+  return request<void>(`/sessions/sessions/${sessionId}`, { method: "DELETE" });
+}
+
+export async function revokeAllSessions(): Promise<void> {
+  return request<void>("/sessions/sessions/revoke-all", { method: "POST" });
+}
+
+export async function getIpAllowlist(): Promise<{ entries: IpAllowlistEntry[] }> {
+  return request<{ entries: IpAllowlistEntry[] }>("/sessions/ip-allowlist");
+}
+
+export async function addIpAllowlistEntry(entry: { cidr: string; label?: string }): Promise<{ entry: IpAllowlistEntry }> {
+  return request<{ entry: IpAllowlistEntry }>("/sessions/ip-allowlist", {
+    method: "POST",
+    body: JSON.stringify(entry),
+  });
+}
+
+export async function removeIpAllowlistEntry(entryId: string): Promise<void> {
+  return request<void>(`/sessions/ip-allowlist/${entryId}`, { method: "DELETE" });
+}
+
+// ─── Integration Health ──────────────────────────────────────────────────────
+
+export interface IntegrationHealthSummary {
+  provider: string;
+  status: string;
+  lastRunAt: string | null;
+  successRate: number;
+  totalRuns: number;
+  dlqCount: number;
+}
+
+export interface IntegrationRunEntry {
+  id: string;
+  provider: string;
+  status: string;
+  itemsProcessed: number;
+  itemsFailed: number;
+  errorMessage: string | null;
+  startedAt: string;
+  completedAt: string | null;
+}
+
+export interface DlqEntry {
+  id: string;
+  externalId: string | null;
+  errorMessage: string;
+  retryCount: number;
+  status: string;
+  createdAt: string;
+}
+
+export async function getIntegrationHealth(): Promise<{ providers: IntegrationHealthSummary[] }> {
+  return request<{ providers: IntegrationHealthSummary[] }>("/integration-health/health");
+}
+
+export async function getIntegrationRuns(params?: {
+  provider?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ runs: IntegrationRunEntry[]; total: number }> {
+  const qs = new URLSearchParams();
+  if (params) Object.entries(params).forEach(([k, v]) => { if (v !== undefined) qs.set(k, String(v)); });
+  const query = qs.toString();
+  return request<{ runs: IntegrationRunEntry[]; total: number }>(`/integration-health/runs${query ? `?${query}` : ""}`);
+}
+
+export async function getDlqEntries(params?: {
+  status?: string;
+  provider?: string;
+}): Promise<{ entries: DlqEntry[] }> {
+  const qs = new URLSearchParams();
+  if (params) Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, v); });
+  const query = qs.toString();
+  return request<{ entries: DlqEntry[] }>(`/integration-health/dlq${query ? `?${query}` : ""}`);
+}
+
+export async function replayDlqEntry(entryId: string): Promise<void> {
+  return request<void>(`/integration-health/dlq/${entryId}/replay`, { method: "POST" });
+}
+
+export async function discardDlqEntry(entryId: string): Promise<void> {
+  return request<void>(`/integration-health/dlq/${entryId}`, { method: "DELETE" });
+}
+
+// ─── Data Governance ──────────────────────────────────────────────────────────
+
+export interface GovernancePolicy {
+  defaultRetentionDays: number;
+  callRetentionDays: number;
+  storyRetentionDays: number;
+  transcriptRetentionDays: number;
+  piiExportAllowed: boolean;
+  namedStoryExportAllowed: boolean;
+}
+
+export interface RetentionJobEntry {
+  id: string;
+  policyName: string;
+  targetType: string;
+  retentionDays: number;
+  status: string;
+  itemsEvaluated: number;
+  itemsDeleted: number;
+  scheduledAt: string;
+}
+
+export interface LegalHoldEntry {
+  id: string;
+  scope: string;
+  targetId: string | null;
+  reason: string;
+  holdStartedAt: string;
+  holdEndedAt: string | null;
+}
+
+export interface DeletionRequestEntry {
+  id: string;
+  targetType: string;
+  targetId: string;
+  reason: string | null;
+  status: string;
+  createdAt: string;
+}
+
+export async function getGovernancePolicy(): Promise<{ policy: GovernancePolicy | null }> {
+  return request<{ policy: GovernancePolicy | null }>("/governance/policy");
+}
+
+export async function updateGovernancePolicy(policy: Partial<GovernancePolicy>): Promise<{ policy: GovernancePolicy }> {
+  return request<{ policy: GovernancePolicy }>("/governance/policy", {
+    method: "PUT",
+    body: JSON.stringify(policy),
+  });
+}
+
+export async function getRetentionJobs(): Promise<{ jobs: RetentionJobEntry[] }> {
+  return request<{ jobs: RetentionJobEntry[] }>("/governance/retention");
+}
+
+export async function getLegalHolds(): Promise<{ holds: LegalHoldEntry[] }> {
+  return request<{ holds: LegalHoldEntry[] }>("/governance/legal-holds");
+}
+
+export async function createLegalHold(hold: { scope: string; targetId?: string; reason: string; externalRef?: string }): Promise<{ hold: LegalHoldEntry }> {
+  return request<{ hold: LegalHoldEntry }>("/governance/legal-holds", {
+    method: "POST",
+    body: JSON.stringify(hold),
+  });
+}
+
+export async function releaseLegalHold(holdId: string): Promise<void> {
+  return request<void>(`/governance/legal-holds/${holdId}/release`, { method: "POST" });
+}
+
+export async function getDeletionRequests(): Promise<{ requests: DeletionRequestEntry[] }> {
+  return request<{ requests: DeletionRequestEntry[] }>("/governance/deletion-requests");
+}
+
+export async function createDeletionRequest(req: { targetType: string; targetId: string; reason?: string }): Promise<{ request: DeletionRequestEntry }> {
+  return request<{ request: DeletionRequestEntry }>("/governance/deletion-requests", {
+    method: "POST",
+    body: JSON.stringify(req),
+  });
+}
+
+export async function approveDeletion(requestId: string): Promise<void> {
+  return request<void>(`/governance/deletion-requests/${requestId}/approve`, { method: "POST" });
+}
+
+export async function rejectDeletion(requestId: string): Promise<void> {
+  return request<void>(`/governance/deletion-requests/${requestId}/reject`, { method: "POST" });
+}
+
+// ─── Automation ──────────────────────────────────────────────────────────────
+
+export interface AutomationRuleEntry {
+  id: string;
+  name: string;
+  description: string | null;
+  triggerType: string;
+  triggerConfig: unknown;
+  actionType: string;
+  actionConfig: unknown;
+  enabled: boolean;
+  priority: number;
+  lastTriggeredAt: string | null;
+}
+
+export interface AutomationExecutionEntry {
+  id: string;
+  ruleId: string;
+  status: string;
+  errorMessage: string | null;
+  durationMs: number | null;
+  createdAt: string;
+}
+
+export interface DeliveryTargetEntry {
+  id: string;
+  name: string;
+  targetType: string;
+  config: unknown;
+  enabled: boolean;
+  lastUsedAt: string | null;
+  lastError: string | null;
+}
+
+export async function getAutomationRules(): Promise<{ rules: AutomationRuleEntry[] }> {
+  return request<{ rules: AutomationRuleEntry[] }>("/automation/rules");
+}
+
+export async function createAutomationRule(rule: {
+  name: string;
+  description?: string;
+  triggerType: string;
+  triggerConfig: unknown;
+  actionType: string;
+  actionConfig: unknown;
+  priority?: number;
+}): Promise<{ rule: AutomationRuleEntry }> {
+  return request<{ rule: AutomationRuleEntry }>("/automation/rules", {
+    method: "POST",
+    body: JSON.stringify(rule),
+  });
+}
+
+export async function updateAutomationRule(ruleId: string, updates: Partial<AutomationRuleEntry>): Promise<{ rule: AutomationRuleEntry }> {
+  return request<{ rule: AutomationRuleEntry }>(`/automation/rules/${ruleId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deleteAutomationRule(ruleId: string): Promise<void> {
+  return request<void>(`/automation/rules/${ruleId}`, { method: "DELETE" });
+}
+
+export async function getAutomationExecutions(params?: {
+  ruleId?: string;
+  status?: string;
+  limit?: number;
+}): Promise<{ executions: AutomationExecutionEntry[] }> {
+  const qs = new URLSearchParams();
+  if (params) Object.entries(params).forEach(([k, v]) => { if (v !== undefined) qs.set(k, String(v)); });
+  const query = qs.toString();
+  return request<{ executions: AutomationExecutionEntry[] }>(`/automation/executions${query ? `?${query}` : ""}`);
+}
+
+export async function getDeliveryTargets(): Promise<{ targets: DeliveryTargetEntry[] }> {
+  return request<{ targets: DeliveryTargetEntry[] }>("/automation/delivery-targets");
+}
+
+export async function createDeliveryTarget(target: {
+  name: string;
+  targetType: string;
+  config: unknown;
+}): Promise<{ target: DeliveryTargetEntry }> {
+  return request<{ target: DeliveryTargetEntry }>("/automation/delivery-targets", {
+    method: "POST",
+    body: JSON.stringify(target),
+  });
+}
+
+export async function deleteDeliveryTarget(targetId: string): Promise<void> {
+  return request<void>(`/automation/delivery-targets/${targetId}`, { method: "DELETE" });
+}
+
+// ─── Onboarding ──────────────────────────────────────────────────────────────
+
+export interface OnboardingStep {
+  id: string;
+  stepKey: string;
+  stepName: string;
+  completed: boolean;
+  completedAt: string | null;
+  sortOrder: number;
+}
+
+export interface OrgHealthScore {
+  id: string;
+  overallScore: number;
+  dimensions: Record<string, number>;
+  trend: string | null;
+  calculatedAt: string;
+}
+
+export async function getOnboardingProgress(): Promise<{ steps: OnboardingStep[] }> {
+  return request<{ steps: OnboardingStep[] }>("/onboarding/progress");
+}
+
+export async function completeOnboardingStep(stepKey: string): Promise<{ step: OnboardingStep }> {
+  return request<{ step: OnboardingStep }>(`/onboarding/progress/${stepKey}/complete`, { method: "POST" });
+}
+
+export async function initializeOnboarding(): Promise<{ steps: OnboardingStep[] }> {
+  return request<{ steps: OnboardingStep[] }>("/onboarding/progress/initialize", { method: "POST" });
+}
+
+export async function getOrgHealthScore(): Promise<{ score: OrgHealthScore | null }> {
+  return request<{ score: OrgHealthScore | null }>("/onboarding/health");
+}
+
+export async function calculateOrgHealthScore(): Promise<{ score: OrgHealthScore }> {
+  return request<{ score: OrgHealthScore }>("/onboarding/health/calculate", { method: "POST" });
+}
+
+// ─── Approval Workflows ──────────────────────────────────────────────────────
+
+export interface ApprovalWorkflowEntry {
+  id: string;
+  name: string;
+  targetType: string;
+  stepsJson: unknown;
+  enabled: boolean;
+}
+
+export interface ApprovalRequestEntry {
+  id: string;
+  workflowId: string;
+  targetType: string;
+  targetId: string;
+  requesterId: string;
+  state: string;
+  currentStep: number;
+  reviewerId: string | null;
+  reviewNote: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+}
+
+export async function getApprovalWorkflows(): Promise<{ workflows: ApprovalWorkflowEntry[] }> {
+  return request<{ workflows: ApprovalWorkflowEntry[] }>("/approvals/workflows");
+}
+
+export async function createApprovalWorkflow(workflow: {
+  name: string;
+  targetType: string;
+  stepsJson: unknown;
+}): Promise<{ workflow: ApprovalWorkflowEntry }> {
+  return request<{ workflow: ApprovalWorkflowEntry }>("/approvals/workflows", {
+    method: "POST",
+    body: JSON.stringify(workflow),
+  });
+}
+
+export async function getApprovalRequests(params?: { state?: string; targetType?: string }): Promise<{ requests: ApprovalRequestEntry[] }> {
+  const qs = new URLSearchParams();
+  if (params) Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, v); });
+  const query = qs.toString();
+  return request<{ requests: ApprovalRequestEntry[] }>(`/approvals/requests${query ? `?${query}` : ""}`);
+}
+
+export async function approveRequest(requestId: string, note?: string): Promise<void> {
+  return request<void>(`/approvals/requests/${requestId}/approve`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+
+export async function rejectRequest(requestId: string, note?: string): Promise<void> {
+  return request<void>(`/approvals/requests/${requestId}/reject`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+
+// ─── CRM Writeback ───────────────────────────────────────────────────────────
+
+export interface CrmWritebackEntry {
+  id: string;
+  provider: string;
+  writebackType: string;
+  targetObject: string;
+  targetId: string;
+  status: string;
+  retryCount: number;
+  errorMessage: string | null;
+  createdAt: string;
+}
+
+export async function getCrmWritebacks(params?: {
+  status?: string;
+  provider?: string;
+  limit?: number;
+}): Promise<{ actions: CrmWritebackEntry[] }> {
+  const qs = new URLSearchParams();
+  if (params) Object.entries(params).forEach(([k, v]) => { if (v !== undefined) qs.set(k, String(v)); });
+  const query = qs.toString();
+  return request<{ actions: CrmWritebackEntry[] }>(`/crm-writeback${query ? `?${query}` : ""}`);
+}
+
+export async function approveCrmWriteback(actionId: string): Promise<void> {
+  return request<void>(`/crm-writeback/${actionId}/approve`, { method: "POST" });
+}
+
+export async function rejectCrmWriteback(actionId: string): Promise<void> {
+  return request<void>(`/crm-writeback/${actionId}/reject`, { method: "POST" });
+}

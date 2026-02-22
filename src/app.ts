@@ -51,6 +51,19 @@ import { createSetupRoutes } from "./api/setup-routes.js";
 import { createNotificationRoutes } from "./api/notification-routes.js";
 import { createAnalyticsRoutes } from "./api/analytics-routes.js";
 
+// ─── Enterprise API Routes ──────────────────────────────────────────────────
+import { createSessionRoutes } from "./api/session-routes.js";
+import { createScimRoutes } from "./api/scim-routes.js";
+import { createIntegrationHealthRoutes } from "./api/integration-health-routes.js";
+import { createGovernanceRoutes } from "./api/governance-routes.js";
+import { createCrmWritebackRoutes } from "./api/crm-writeback-routes.js";
+import { createAutomationRoutes } from "./api/automation-routes.js";
+import { createApprovalRoutes } from "./api/approval-routes.js";
+import { createOnboardingRoutes } from "./api/onboarding-routes.js";
+import { createArtifactRoutes } from "./api/artifact-routes.js";
+import { createDataQualityRoutes } from "./api/data-quality-routes.js";
+import { createMergePreviewRoutes } from "./api/merge-preview-routes.js";
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 import { requireAuth } from "./middleware/auth.js";
 import {
@@ -335,6 +348,48 @@ export function createApp(deps: AppDeps): express.Application {
 
   // Chatbot Connector UI
   app.use("/chat", trialGate, createChatbotConnectorRoutes());
+
+  // ─── Enterprise: Session Management & IP Allowlists ───────────────────────
+  app.use("/api/sessions", trialGate, createSessionRoutes(prisma));
+
+  // ─── Enterprise: SCIM 2.0 Provisioning ────────────────────────────────────
+  app.use(
+    "/api/scim/v2",
+    trialGate,
+    requirePermission(prisma, "manage_permissions"),
+    createScimRoutes(prisma)
+  );
+
+  // ─── Enterprise: Integration Health & DLQ ─────────────────────────────────
+  app.use(
+    "/api/integration-health",
+    trialGate,
+    createIntegrationHealthRoutes(prisma)
+  );
+
+  // ─── Enterprise: Data Governance ──────────────────────────────────────────
+  app.use("/api/governance", trialGate, createGovernanceRoutes(prisma));
+
+  // ─── Enterprise: CRM Writeback ────────────────────────────────────────────
+  app.use("/api/crm-writeback", trialGate, createCrmWritebackRoutes(prisma));
+
+  // ─── Enterprise: Workflow Automation ──────────────────────────────────────
+  app.use("/api/automation", trialGate, createAutomationRoutes(prisma));
+
+  // ─── Enterprise: Approval Workflows ───────────────────────────────────────
+  app.use("/api/approvals", trialGate, createApprovalRoutes(prisma));
+
+  // ─── Enterprise: Onboarding & Health ──────────────────────────────────────
+  app.use("/api/onboarding", trialGate, createOnboardingRoutes(prisma));
+
+  // ─── Enterprise: Artifact Versioning & Publish Approvals ──────────────────
+  app.use("/api/artifacts", trialGate, createArtifactRoutes(prisma));
+
+  // ─── Enterprise: Data Quality, Lineage & Saved Views ─────────────────────
+  app.use("/api/data-quality", trialGate, createDataQualityRoutes(prisma));
+
+  // ─── Enterprise: Merge Previews & Shared Assets ──────────────────────────
+  app.use("/api/merge-preview", trialGate, createMergePreviewRoutes(prisma));
 
   return app;
 }
