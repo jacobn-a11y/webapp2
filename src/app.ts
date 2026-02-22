@@ -68,6 +68,10 @@ import { createRoleDashboardRoutes } from "./api/role-dashboard-routes.js";
 import { createSeatManagementRoutes } from "./api/seat-management-routes.js";
 import { createDrReadinessRoutes } from "./api/dr-readiness-routes.js";
 import { createSupportConsoleRoutes } from "./api/support-console-routes.js";
+import { createEnvironmentRoutes } from "./api/environment-routes.js";
+
+// ─── Performance Middleware ─────────────────────────────────────────────────
+import { dashboardCache } from "./middleware/cache-control.js";
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 import { requireAuth } from "./middleware/auth.js";
@@ -397,10 +401,10 @@ export function createApp(deps: AppDeps): express.Application {
   app.use("/api/merge-preview", trialGate, createMergePreviewRoutes(prisma));
 
   // ─── Enterprise: KPI Reporting ────────────────────────────────────────────
-  app.use("/api/kpi", trialGate, createKpiRoutes(prisma));
+  app.use("/api/kpi", trialGate, dashboardCache, createKpiRoutes(prisma));
 
   // ─── Enterprise: Role-Specific Dashboards ─────────────────────────────────
-  app.use("/api/dashboards", trialGate, createRoleDashboardRoutes(prisma));
+  app.use("/api/dashboards", trialGate, dashboardCache, createRoleDashboardRoutes(prisma));
 
   // ─── Enterprise: Seat Management & Metering ───────────────────────────────
   app.use("/api/billing/seats", trialGate, createSeatManagementRoutes(prisma));
@@ -419,6 +423,14 @@ export function createApp(deps: AppDeps): express.Application {
     trialGate,
     requirePermission(prisma, "manage_permissions"),
     createSupportConsoleRoutes(prisma)
+  );
+
+  // ─── Enterprise: Environment & Deploy Controls ─────────────────────────────
+  app.use(
+    "/api/environment",
+    trialGate,
+    requirePermission(prisma, "manage_permissions"),
+    createEnvironmentRoutes(prisma)
   );
 
   return app;

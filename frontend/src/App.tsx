@@ -16,6 +16,10 @@ import { AdminIntegrationHealthPage } from "./pages/AdminIntegrationHealthPage";
 import { AdminGovernancePage } from "./pages/AdminGovernancePage";
 import { AdminAutomationPage } from "./pages/AdminAutomationPage";
 import { AdminOnboardingPage } from "./pages/AdminOnboardingPage";
+import { AdminKpiPage } from "./pages/AdminKpiPage";
+import { AdminBillingPage } from "./pages/AdminBillingPage";
+import { AdminDrPage } from "./pages/AdminDrPage";
+import { AdminSupportPage } from "./pages/AdminSupportPage";
 
 export default function App() {
   return (
@@ -63,6 +67,18 @@ export default function App() {
           </Link>
           <Link to="/admin/onboarding" className="app-nav__link">
             Onboarding
+          </Link>
+          <Link to="/admin/kpi" className="app-nav__link">
+            KPI
+          </Link>
+          <Link to="/admin/billing" className="app-nav__link">
+            Billing
+          </Link>
+          <Link to="/admin/dr" className="app-nav__link">
+            DR
+          </Link>
+          <Link to="/admin/support" className="app-nav__link">
+            Support
           </Link>
         </nav>
         <main className="app-content">
@@ -138,6 +154,22 @@ export default function App() {
             <Route
               path="/admin/onboarding"
               element={<AdminOnboardingPage />}
+            />
+            <Route
+              path="/admin/kpi"
+              element={<AdminKpiPage />}
+            />
+            <Route
+              path="/admin/billing"
+              element={<AdminBillingPage />}
+            />
+            <Route
+              path="/admin/dr"
+              element={<AdminDrPage />}
+            />
+            <Route
+              path="/admin/support"
+              element={<AdminSupportPage />}
             />
           </Routes>
         </main>

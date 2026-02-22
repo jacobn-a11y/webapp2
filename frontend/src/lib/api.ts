@@ -1126,3 +1126,172 @@ export async function approveCrmWriteback(actionId: string): Promise<void> {
 export async function rejectCrmWriteback(actionId: string): Promise<void> {
   return request<void>(`/crm-writeback/${actionId}/reject`, { method: "POST" });
 }
+
+// ─── KPI Reporting ───────────────────────────────────────────────────────────
+
+export interface PipelineMetrics {
+  totalAccounts: number;
+  accountsWithStories: number;
+  storiesGenerated: number;
+  pagesPublished: number;
+  averageStoriesPerAccount: number;
+}
+
+export interface ContentMetrics {
+  totalStories: number;
+  storiesByType: Record<string, number>;
+  storiesByFunnel: Record<string, number>;
+  averageStoryLength: number;
+  totalLandingPages: number;
+  publishedPages: number;
+  draftPages: number;
+}
+
+export interface TeamMetrics {
+  totalUsers: number;
+  activeUsers: number;
+  storiesPerUser: Record<string, number>;
+  topContributors: Array<{ userId: string; name: string | null; storyCount: number }>;
+}
+
+export interface ExecutiveReport {
+  generatedAt: string;
+  timeRange: { startDate: string; endDate: string };
+  pipeline: PipelineMetrics;
+  content: ContentMetrics;
+  team: TeamMetrics;
+}
+
+export async function getKpiPipeline(start?: string, end?: string): Promise<{ metrics: PipelineMetrics }> {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const query = qs.toString();
+  return request<{ metrics: PipelineMetrics }>(`/kpi/pipeline${query ? `?${query}` : ""}`);
+}
+
+export async function getKpiContent(start?: string, end?: string): Promise<{ metrics: ContentMetrics }> {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const query = qs.toString();
+  return request<{ metrics: ContentMetrics }>(`/kpi/content${query ? `?${query}` : ""}`);
+}
+
+export async function getKpiTeam(start?: string, end?: string): Promise<{ metrics: TeamMetrics }> {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const query = qs.toString();
+  return request<{ metrics: TeamMetrics }>(`/kpi/team${query ? `?${query}` : ""}`);
+}
+
+export async function getExecutiveReport(start?: string, end?: string): Promise<{ report: ExecutiveReport }> {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const query = qs.toString();
+  return request<{ report: ExecutiveReport }>(`/kpi/executive${query ? `?${query}` : ""}`);
+}
+
+// ─── Role Dashboards ─────────────────────────────────────────────────────────
+
+export async function getRevOpsDashboard(): Promise<any> {
+  return request<any>("/dashboards/revops");
+}
+
+export async function getMarketingDashboard(): Promise<any> {
+  return request<any>("/dashboards/marketing");
+}
+
+export async function getSalesDashboard(): Promise<any> {
+  return request<any>("/dashboards/sales");
+}
+
+export async function getCsDashboard(): Promise<any> {
+  return request<any>("/dashboards/cs");
+}
+
+// ─── Seat Management ─────────────────────────────────────────────────────────
+
+export interface SeatUsage {
+  seatLimit: number | null;
+  seatsUsed: number;
+  seatsAvailable: number | null;
+  overLimit: boolean;
+}
+
+export interface UsageSummaryData {
+  storiesGenerated: number;
+  pagesPublished: number;
+  callsProcessed: number;
+  aiTokensUsed: number;
+  apiCallsMade: number;
+}
+
+export interface EntitlementEntry {
+  feature: string;
+  entitled: boolean;
+  limit: number | null;
+  used: number;
+}
+
+export async function getSeatUsage(): Promise<{ usage: SeatUsage }> {
+  return request<{ usage: SeatUsage }>("/billing/seats/seats");
+}
+
+export async function getUsageSummary(start?: string, end?: string): Promise<{ summary: UsageSummaryData }> {
+  const qs = new URLSearchParams();
+  if (start) qs.set("start", start);
+  if (end) qs.set("end", end);
+  const query = qs.toString();
+  return request<{ summary: UsageSummaryData }>(`/billing/seats/usage${query ? `?${query}` : ""}`);
+}
+
+export async function getEntitlements(): Promise<{ entitlements: EntitlementEntry[] }> {
+  return request<{ entitlements: EntitlementEntry[] }>("/billing/seats/entitlements");
+}
+
+export async function updateSeatLimit(limit: number | null): Promise<{ usage: SeatUsage }> {
+  return request<{ usage: SeatUsage }>("/billing/seats/seats/limit", {
+    method: "PUT",
+    body: JSON.stringify({ limit }),
+  });
+}
+
+// ─── DR Readiness ────────────────────────────────────────────────────────────
+
+export async function getDrStatus(): Promise<any> {
+  return request<any>("/dr/status");
+}
+
+export async function validateDr(): Promise<any> {
+  return request<any>("/dr/validate", { method: "POST" });
+}
+
+export async function getExportManifest(): Promise<any> {
+  return request<any>("/dr/export-manifest");
+}
+
+// ─── Support Console ─────────────────────────────────────────────────────────
+
+export async function getSupportOrgOverview(): Promise<any> {
+  return request<any>("/support/org-overview");
+}
+
+export async function getSupportUsers(): Promise<any> {
+  return request<any>("/support/users");
+}
+
+export async function getSupportFeatureFlags(): Promise<any> {
+  return request<any>("/support/feature-flags");
+}
+
+export async function getSupportRecentActivity(limit?: number): Promise<any> {
+  const qs = limit ? `?limit=${limit}` : "";
+  return request<any>(`/support/recent-activity${qs}`);
+}
+
+export async function getSupportIntegrationStatus(): Promise<any> {
+  return request<any>("/support/integration-status");
+}
