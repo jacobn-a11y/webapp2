@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, NavLink, Navigate } from "react-router-dom";
 import { AccountDetailPage } from "./pages/AccountDetailPage";
 import { LandingPageEditorPage } from "./pages/LandingPageEditorPage";
 import { AdminAccountAccessPage } from "./pages/AdminAccountAccessPage";
@@ -21,65 +21,82 @@ import { AdminBillingPage } from "./pages/AdminBillingPage";
 import { AdminDrPage } from "./pages/AdminDrPage";
 import { AdminSupportPage } from "./pages/AdminSupportPage";
 
+function navLinkClass({ isActive }: { isActive: boolean }) {
+  return "app-nav__link" + (isActive ? " app-nav__link--active" : "");
+}
+
+function adminLinkClass({ isActive }: { isActive: boolean }) {
+  return "app-nav__dropdown-item" + (isActive ? " app-nav__dropdown-item--active" : "");
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <div className="app-shell">
         <nav className="app-nav">
-          <Link to="/" className="app-nav__logo">
+          <NavLink to="/" className="app-nav__logo">
             StoryEngine
-          </Link>
-          <Link to="/" className="app-nav__link">
-            Dashboard
-          </Link>
-          <Link to="/dashboard/pages" className="app-nav__link">
-            Pages
-          </Link>
-          <Link to="/analytics" className="app-nav__link">
-            Analytics
-          </Link>
-          <Link to="/chat" className="app-nav__link">
-            Chat
-          </Link>
-          <Link to="/admin/permissions" className="app-nav__link">
-            Admin
-          </Link>
-          <Link to="/admin/roles" className="app-nav__link">
-            Roles
-          </Link>
-          <Link to="/admin/story-context" className="app-nav__link">
-            Story Context
-          </Link>
-          <Link to="/admin/audit-logs" className="app-nav__link">
-            Audit Logs
-          </Link>
-          <Link to="/admin/sessions" className="app-nav__link">
-            Sessions
-          </Link>
-          <Link to="/admin/integration-health" className="app-nav__link">
-            Integrations
-          </Link>
-          <Link to="/admin/governance" className="app-nav__link">
-            Governance
-          </Link>
-          <Link to="/admin/automation" className="app-nav__link">
-            Automation
-          </Link>
-          <Link to="/admin/onboarding" className="app-nav__link">
-            Onboarding
-          </Link>
-          <Link to="/admin/kpi" className="app-nav__link">
-            KPI
-          </Link>
-          <Link to="/admin/billing" className="app-nav__link">
-            Billing
-          </Link>
-          <Link to="/admin/dr" className="app-nav__link">
-            DR
-          </Link>
-          <Link to="/admin/support" className="app-nav__link">
-            Support
-          </Link>
+          </NavLink>
+          <div className="app-nav__links">
+            <NavLink to="/dashboard/pages" className={navLinkClass}>
+              Pages
+            </NavLink>
+            <NavLink to="/analytics" className={navLinkClass}>
+              Analytics
+            </NavLink>
+            <NavLink to="/chat" className={navLinkClass}>
+              Chat
+            </NavLink>
+            <div className="app-nav__dropdown">
+              <button className="app-nav__dropdown-trigger">
+                Admin ▾
+              </button>
+              <div className="app-nav__dropdown-menu">
+                <NavLink to="/admin/permissions" className={adminLinkClass}>
+                  Permissions
+                </NavLink>
+                <NavLink to="/admin/roles" className={adminLinkClass}>
+                  Roles
+                </NavLink>
+                <NavLink to="/admin/account-access" className={adminLinkClass}>
+                  Account Access
+                </NavLink>
+                <NavLink to="/admin/story-context" className={adminLinkClass}>
+                  Story Context
+                </NavLink>
+                <NavLink to="/admin/audit-logs" className={adminLinkClass}>
+                  Audit Logs
+                </NavLink>
+                <NavLink to="/admin/sessions" className={adminLinkClass}>
+                  Sessions
+                </NavLink>
+                <NavLink to="/admin/integration-health" className={adminLinkClass}>
+                  Integrations
+                </NavLink>
+                <NavLink to="/admin/governance" className={adminLinkClass}>
+                  Governance
+                </NavLink>
+                <NavLink to="/admin/automation" className={adminLinkClass}>
+                  Automation
+                </NavLink>
+                <NavLink to="/admin/onboarding" className={adminLinkClass}>
+                  Onboarding
+                </NavLink>
+                <NavLink to="/admin/kpi" className={adminLinkClass}>
+                  KPI
+                </NavLink>
+                <NavLink to="/admin/billing" className={adminLinkClass}>
+                  Billing
+                </NavLink>
+                <NavLink to="/admin/dr" className={adminLinkClass}>
+                  Disaster Recovery
+                </NavLink>
+                <NavLink to="/admin/support" className={adminLinkClass}>
+                  Support
+                </NavLink>
+              </div>
+            </div>
+          </div>
         </nav>
         <main className="app-content">
           <Routes>
